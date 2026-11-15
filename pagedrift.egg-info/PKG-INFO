@@ -1,0 +1,139 @@
+Metadata-Version: 2.4
+Name: pagedrift
+Version: 0.1.0
+Summary: Offline deep-pagination drift and continuity verification bench
+License: MIT
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: PyYAML>=6.0
+Provides-Extra: test
+Requires-Dist: pytest>=8.0; extra == "test"
+
+# 深页漂移核验台 / pagedrift
+
+Deep-pagination drift verification bench.
+
+> **Compliance first.** pagedrift is for analysing synthetic data sources, or
+> sources you own or are explicitly authorised to test. It is local-only and
+> offline-first: the runtime refuses non-loopback HTTP endpoints, never contacts
+> a real site, and contains no anti-bot evasion, identity spoofing or pressure
+> tooling. See [docs/COMPLIANCE.md](docs/COMPLIANCE.md).
+
+pagedrift answers one narrow question: **when a paginated collection stops, can
+you prove that it saw the right records, exactly once, in a continuous order?**
+
+It starts a loopback-only synthetic API, requests the same mutable ordered list
+with four pagination strategies, stores every raw page byte, and reconciles the
+observations against the starting snapshot, the mutation log and the declared
+termination conditions. The output is an auditable run directory, three views of
+each audit, a cross-strategy comparison and a SQLite ledger.
+
+## Is / is not
+
+**Is**
+
+- A correctness and continuity harness for deep pagination.
+- A deterministic mock source with a request-keyed insert/delete/sort-key
+  mutation scheduler.
+- A detector for skips, duplicates, out-of-order keys, premature termination and
+  tail truncation, with page-level evidence attribution.
+- A strategy safety evaluator for `offset`, `page`, `keyset` and `snapshot`.
+- A byte-exact evidence archive plus a replayable SQLite ledger.
+
+**Is not**
+
+- A general crawler, scraper framework, DOM/HTML parser or detail-page fetcher.
+- An anti-bot or rate-limit evasion tool; it never talks to real sites.
+- A scheduler, job DAG, worker pool or resumable orchestration layer.
+- A link checker, archival system, feed poller, or form-filling RPA.
+- A fuzzy entity-deduplication or business-metric calculation tool.
+
+## Quick start
+
+```bash
+python -m pagedrift demo --out dist/demo
+pytest -q
+```
+
+`demo` exits 0 after: mock source → four collections → audit → comparison →
+JSON/Markdown/self-contained HTML reports → `ledger.sqlite`. It defaults to the
+in-process transport. For the loopback HTTP facade:
+
+```bash
+python -m pagedrift demo --out dist/demo-http --transport http --port 0
+```
+
+All synthetic data is generated deterministically. `--frozen-time
+2024-01-01T00:00:00Z` (the default) fixes timestamps and makes evidence and audit
+reports reproducible; `--seed` overrides the plan's dataset seed.
+
+## Strategy map
+
+| Strategy | Request shape | Cursor source | Mutable-source exposure |
+|---|---|---|---|
+| `offset` | `?offset=&limit=` | numeric window | High: inserts/deletes shift every later window |
+| `pagenum` | `?page=&page_size=` | page number | High: equivalent to offset windows |
+| `keyset` | `?after_key=&limit=` | last observed `sort_key` | Lower: already-passed keys are not revisited, but changed keys and deleted tails still matter |
+| `snapshot` | `?snapshot=<token>&offset=&limit=` | pinned snapshot + offset | Safe baseline: all pages read one immutable view |
+
+The comparison command verifies that universe, schedule and plan fingerprints
+match before drawing conclusions:
+
+```bash
+python -m pagedrift compare dist/demo/offset dist/demo/pagenum \
+  dist/demo/keyset dist/demo/snapshot --out dist/demo
+```
+
+## Finding codes
+
+| Code | Meaning |
+|---|---|
+| `DRIFT_SKIP` | An item in the starting snapshot has a key inside the observed range but was never collected. |
+| `DRIFT_DUP` | One natural key was observed at least twice. Each extra occurrence is reported on its page. |
+| `DRIFT_OOR` | The observed `sort_key` sequence decreased, or a natural key reappeared with a changed key. |
+| `DRIFT_PREMATURE_TERM` | The collector stopped while initial items with keys above the observed maximum were still pending. |
+| `DRIFT_TAIL_TRUNC` | A short/empty final page was treated as the end although the initial snapshot extends past the observed maximum. |
+| `DRIFT_INSERT_OBSERVED` | A collection-time insert was observed; this is **not a defect** and is attributed through `mutation_log.jsonl`. |
+| `RESP_INVALID` | Integrity failure: malformed page, failed run, missing snapshot token, or a token that changed mid-run. |
+
+Cursor displacement is direction-sensitive. A removal before an offset cursor
+moves later records past the next window and can skip one; an insertion before
+the cursor shifts the boundary and can repeat one. The auditor does not guess a
+cause from the mutation type: it classifies what the evidence proves.
+
+## Other commands
+
+```bash
+# Recompute every page hash and compare with requests.jsonl and the ledger.
+python -m pagedrift evidence verify dist/demo/offset --ledger dist/demo/ledger.sqlite
+
+# Re-audit an existing run, optionally recording it in another ledger.
+python -m pagedrift audit --run-dir dist/demo/offset --ledger dist/demo/ledger.sqlite
+
+# Query the ledger for one run.
+python -m pagedrift ledger show --run <run_id> --ledger dist/demo/ledger.sqlite
+
+# Collect and audit just one declared strategy.
+python -m pagedrift collect --plan pagedrift/plans/default.yaml \
+  --strategy keyset --out dist/keyset-only
+```
+
+## Repository layout
+
+```
+pagedrift/             package
+  mock/                mutable ordered universe, mutation schedule, loopback HTTP facade
+  collectors/          shared contract/validation plus four strategy collectors
+  audit/              findings engine, termination proof, extras attribution, comparison
+  store/              SQLite ledger
+  report/             deterministic JSON, Markdown and inline-CSS HTML
+  plans/              commented YAML plans and mutation schedules
+  fixtures/           deterministic JSONL universes and golden hashes
+tests/                 offline pytest suite, including golden and HTTP tests
+docs/                  compliance and design notes
+```
+
+Runtime dependencies are Python 3.10+ and PyYAML only. HTTP uses
+`urllib.request`; the mock uses `http.server.ThreadingHTTPServer`; storage uses
+stdlib `sqlite3`. No browser, Flask/FastAPI, requests, cloud service or external
+asset is used.

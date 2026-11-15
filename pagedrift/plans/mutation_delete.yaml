@@ -1,0 +1,8 @@
+# Focused schedule: delete an item that page 1 already returned.
+# The next offset page starts one position too far ahead.
+version: 1
+before_request:
+  - at: 2
+    mutations:
+      - type: delete
+        id: itm-0001

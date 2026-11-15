@@ -1,0 +1,2 @@
+[console_scripts]
+pagedrift = pagedrift.cli:main
