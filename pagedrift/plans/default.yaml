@@ -1,0 +1,62 @@
+# pagedrift default plan.
+# Every dataset here is synthetic; source.base_url must resolve to loopback only.
+version: 1
+
+# Deterministic generated universe. Set dataset.fixture instead of size/seed to
+# load a checked-in JSONL snapshot.
+dataset:
+  name: demo-universe
+  size: 30
+  seed: 10090
+  start_key: 10
+  key_step: 3
+
+# Mock source endpoint and query parameter names. The loopback guard runs
+# before any socket or HTTP request is created.
+source:
+  base_url: http://127.0.0.1:8765
+  items_path: /items
+  meta_path: /meta
+  sort_key: sort_key
+  offset_param: offset
+  limit_param: limit
+  page_param: page
+  page_size_param: page_size
+  after_key_param: after_key
+  snapshot_param: snapshot
+  max_page_size: 500
+
+# Four strategy-specific settings. limit/page_size must be positive; max_pages
+# is a hard safety stop and never itself proves exhaustion.
+strategies:
+  offset:
+    limit: 5
+    max_pages: 10
+  pagenum:
+    page_size: 5
+    max_pages: 10
+  keyset:
+    limit: 5
+    max_pages: 10
+  snapshot:
+    limit: 5
+    max_pages: 10
+
+# Relative to this plan. The schedule is applied before item requests only.
+mutation_schedule: mutation_mixed.yaml
+
+# A stop is terminally proven only when one of these observations occurred on
+# the final page and max_pages was not the cause of the stop.
+termination:
+  allow:
+    - saw_empty_page
+    - partial_page_lt_limit
+    - exhausted_by_max_key
+
+# Audit tolerances. max_dup_ratio compares duplicate occurrences / observations.
+# allow_out_of_order controls whether observed OOR findings fail the verdict.
+# allow_insert_extra includes attributed collection-time inserts in coverage.
+audit:
+  max_dup_ratio: 0.0
+  allow_out_of_order: false
+  allow_insert_extra: true

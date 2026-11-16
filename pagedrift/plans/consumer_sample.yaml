@@ -1,0 +1,5 @@
+consumer_id: sample-consumer
+categories:
+  - alpha
+  - beta
+minimum_records: 1
