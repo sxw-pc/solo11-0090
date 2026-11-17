@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "offers": [
+    {"item_id": "itm-0001", "sku": "SYN-ALPHA", "price_cny": "20.00", "available_units": 3},
+    {"item_id": "itm-0002", "sku": "SYN-BETA", "price_cny": "125.50", "available_units": 2},
+    {"item_id": "itm-0003", "sku": "SYN-GAMMA", "price_cny": "80.00", "available_units": 1}
+  ]
+}
