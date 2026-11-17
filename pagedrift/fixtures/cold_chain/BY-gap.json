@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "sku": "SYN-ALPHA",
+  "batch_id": "BY",
+  "time_unit": "hour",
+  "temperature_unit": "C",
+  "observations": [
+    {"hour":"0","temperature_c":"2"},
+    {"hour":"1","temperature_c":"2"},
+    {"hour":"3","temperature_c":"2"},
+    {"hour":"4","temperature_c":"2"}
+  ],
+  "max_rate_c_per_hour": "4",
+  "exposure_cutoff_c": "4",
+  "max_degree_hours": "0.5",
+  "contracts": ["linear_assumed", "bounded_certified"],
+  "illustrative_hot_path": [
+    {"hour":"1","temperature_c":"2"},
+    {"hour":"1.5","temperature_c":"4"},
+    {"hour":"2","temperature_c":"6"},
+    {"hour":"2.5","temperature_c":"4"},
+    {"hour":"3","temperature_c":"2"}
+  ]
+}

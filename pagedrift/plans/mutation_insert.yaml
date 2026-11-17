@@ -1,0 +1,16 @@
+# Focused schedule: insert one item below and one above the page-1 cursor.
+# Both insertions happen before request 2.
+version: 1
+before_request:
+  - at: 2
+    mutations:
+      - type: insert
+        id: itm-0901
+        sort_key: 14
+        title: Inserted item A
+        category: inserted
+      - type: insert
+        id: itm-0902
+        sort_key: 26
+        title: Inserted item B
+        category: inserted

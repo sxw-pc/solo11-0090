@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "catalog_sku": "SYN-ALPHA",
+  "batches": [
+    {
+      "batch_id": "BX",
+      "warehouse": "west",
+      "units": 1,
+      "expires_day": 4
+    },
+    {
+      "batch_id": "BY",
+      "warehouse": "east",
+      "units": 1,
+      "expires_day": 2
+    },
+    {
+      "batch_id": "BZ",
+      "warehouse": "east",
+      "units": 1,
+      "expires_day": 2
+    }
+  ],
+  "orders": [
+    {
+      "order_id": "O1",
+      "warehouse": "west",
+      "deadline_day": 1,
+      "units": 1,
+      "ready_day": 0
+    },
+    {
+      "order_id": "O2",
+      "warehouse": "west",
+      "deadline_day": 4,
+      "units": 1,
+      "ready_day": 2
+    },
+    {
+      "order_id": "O3",
+      "warehouse": "east",
+      "deadline_day": 2,
+      "units": 1,
+      "ready_day": 1
+    }
+  ],
+  "transfer_lanes": [
+    {
+      "from": "east",
+      "to": "west",
+      "depart_day": 2,
+      "transit_days": 1,
+      "capacity_units": 1
+    }
+  ],
+  "contracts": [
+    "local_only",
+    "transfer_authorized"
+  ],
+  "claim_attempts": [
+    {
+      "claim_id": "C2",
+      "read_epoch": 1,
+      "order_id": "O2"
+    },
+    {
+      "claim_id": "C3",
+      "read_epoch": 1,
+      "order_id": "O3"
+    }
+  ]
+}
