@@ -1,0 +1,9 @@
+# Focused schedule: move an already observed item's sort key forward.
+# A later page can re-observe the same natural key at a different key.
+version: 1
+before_request:
+  - at: 2
+    mutations:
+      - type: update_sortkey
+        id: itm-0001
+        sort_key: 60
