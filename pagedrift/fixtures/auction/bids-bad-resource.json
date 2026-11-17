@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "auction_id": "SYN-AUCT-001",
+  "resource_item_ids": [
+    "itm-0001",
+    "itm-9999"
+  ],
+  "resource_capacity": {
+    "itm-0001": 1,
+    "itm-9999": 1
+  },
+  "winner_limit_per_owner": 1,
+  "bids": [
+    {
+      "bid_id": "A",
+      "owner_id": "ORG-A",
+      "bundle": [
+        "itm-0001",
+        "itm-0002"
+      ],
+      "amount_cents": 10000
+    },
+    {
+      "bid_id": "B",
+      "owner_id": "ORG-B",
+      "bundle": [
+        "itm-0001"
+      ],
+      "amount_cents": 7000
+    },
+    {
+      "bid_id": "C",
+      "owner_id": "ORG-C",
+      "bundle": [
+        "itm-0002"
+      ],
+      "amount_cents": 6000
+    }
+  ],
+  "settlement_contracts": [
+    {
+      "kind": "pay_as_bid",
+      "charge_rule": "winning_bid_amount"
+    },
+    {
+      "kind": "vcg_externality",
+      "charge_rule": "welfare_without_owner_minus_others_welfare_with_winner"
+    }
+  ]
+}
