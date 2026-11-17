@@ -11,6 +11,7 @@ from .config import PlanError, load_plan, plan_error_lines
 from .evidence import verify_run
 from .pipeline import DEFAULT_FROZEN_TIME, PipelineError, collect_single, run_demo
 from .store.sqlite_ledger import Ledger
+from .catalog_intake import CatalogInputError, intake_catalog
 
 def _add_transport_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--transport", choices=("inprocess", "http"), default="inprocess")
@@ -46,6 +47,10 @@ def _build_parser() -> argparse.ArgumentParser:
     show = ledger_sub.add_parser("show", help="show one run from the ledger")
     show.add_argument("--run", required=True)
     show.add_argument("--ledger", default="dist/demo/ledger.sqlite")
+    catalog = sub.add_parser("catalog-intake", help="read a verified run and a local synthetic offer manifest")
+    catalog.add_argument("--run-dir", required=True)
+    catalog.add_argument("--manifest", required=True)
+    catalog.add_argument("--out", required=True)
     return parser
 def _cmd_demo(args: argparse.Namespace) -> int:
     result = run_demo(
@@ -147,12 +152,19 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _cmd_evidence_verify(args)
         if args.command == "ledger" and args.ledger_command == "show":
             return _cmd_ledger_show(args)
+        if args.command == "catalog-intake":
+            result = intake_catalog(args.run_dir, args.manifest)
+            output = Path(args.out)
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_bytes(json.dumps(result, ensure_ascii=False, sort_keys=True, indent=2).encode("utf-8") + b"\n")
+            print(f"catalog_offers={len(result['offers'])} fingerprint={result['catalog_fingerprint']}")
+            return 0
         parser.error("unknown command")
     except PlanError as exc:
         for line in plan_error_lines(exc):
             print(line, file=sys.stderr)
         return 2
-    except (PipelineError, AuditError, FileNotFoundError, KeyError) as exc:
+    except (PipelineError, AuditError, CatalogInputError, FileNotFoundError, KeyError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
     return 0

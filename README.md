@@ -1,5 +1,11 @@
 # 深页漂移核验台 / pagedrift
 
+The isolated catalog intake example consumes a safe pagination run and a local
+synthetic offer manifest. Run `python -m pagedrift catalog-intake --run-dir
+<demo>/snapshot --manifest pagedrift/fixtures/catalog/offers-valid.json --out
+<output>/catalog.json` after a demo run. It verifies page evidence and emits a
+stable catalog identity, without making any checkout or stock decision.
+
 Deep-pagination drift verification bench.
 
 > **Compliance first.** pagedrift is for analysing synthetic data sources, or
