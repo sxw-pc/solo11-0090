@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "offers": [
+    {
+      "item_id": "itm-0001",
+      "sku": "SYN-FINISHED",
+      "price_cny": "90.00",
+      "available_units": 1
+    },
+    {
+      "item_id": "itm-0002",
+      "sku": "SYN-DOMESTIC",
+      "price_cny": "20.00",
+      "available_units": 1
+    },
+    {
+      "item_id": "itm-0003",
+      "sku": "SYN-IMPORTED",
+      "price_cny": "20.00",
+      "available_units": 1
+    },
+    {
+      "item_id": "itm-0004",
+      "sku": "SYN-LOOP-X",
+      "price_cny": "15.00",
+      "available_units": 1
+    },
+    {
+      "item_id": "itm-0005",
+      "sku": "SYN-LOOP-Y",
+      "price_cny": "15.00",
+      "available_units": 1
+    },
+    {
+      "item_id": "itm-0006",
+      "sku": "SYN-LOOP-Z",
+      "price_cny": "15.00",
+      "available_units": 1
+    },
+    {
+      "item_id": "itm-0007",
+      "sku": "SYN-LOOP-W",
+      "price_cny": "15.00",
+      "available_units": 1
+    }
+  ]
+}

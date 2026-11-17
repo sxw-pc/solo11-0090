@@ -1,0 +1,60 @@
+# Deterministic mixed mutation schedule for the default demo.
+# "at" is the 1-based item-request sequence; all mutations in an entry run
+# immediately before that request and are recorded in mutation_log.jsonl.
+version: 1
+before_request:
+  # Insert one item behind the current offset cursor (duplicate/overlap risk)
+  # and one ahead of it (an observable collection-time extra).
+  - at: 2
+    mutations:
+      - type: insert
+        id: itm-0901
+        sort_key: 14
+        title: Inserted item A
+        category: inserted
+      - type: insert
+        id: itm-0902
+        sort_key: 26
+        title: Inserted item B
+        category: inserted
+
+  # Delete an item already observed. Later offset windows shift past one item.
+  - at: 3
+    mutations:
+      - type: delete
+        id: itm-0005
+
+  # Move an already observed item far forward. It will be observed again with
+  # a changed sort key (duplicate plus an unstable-key jump).
+  - at: 4
+    mutations:
+      - type: update_sortkey
+        id: itm-0001
+        sort_key: 60
+
+  # Remove the unobserved tail. The next page is short/empty while the initial
+  # snapshot still proves that those keys existed at collection start.
+  - at: 5
+    mutations:
+      - type: delete
+        id: itm-0020
+      - type: delete
+        id: itm-0021
+      - type: delete
+        id: itm-0022
+      - type: delete
+        id: itm-0023
+      - type: delete
+        id: itm-0024
+      - type: delete
+        id: itm-0025
+      - type: delete
+        id: itm-0026
+      - type: delete
+        id: itm-0027
+      - type: delete
+        id: itm-0028
+      - type: delete
+        id: itm-0029
+      - type: delete
+        id: itm-0030
