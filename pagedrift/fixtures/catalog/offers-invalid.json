@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "offers": [
+    {"item_id": "itm-9999", "sku": "SYN-GHOST", "price_cny": "100.00", "available_units": 1}
+  ]
+}
