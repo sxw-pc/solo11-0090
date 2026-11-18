@@ -13,6 +13,7 @@ from .pipeline import DEFAULT_FROZEN_TIME, PipelineError, collect_single, run_de
 from .store.sqlite_ledger import Ledger
 from .catalog_intake import CatalogInputError, intake_catalog
 from .demand_evidence import DemandInputError, inspect_demand_evidence
+from .demand_forecast import ForecastInputError, decide_replenishment
 
 def _add_transport_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--transport", choices=("inprocess", "http"), default="inprocess")
@@ -57,6 +58,14 @@ def _build_parser() -> argparse.ArgumentParser:
     demand.add_argument("--catalog-manifest", required=True)
     demand.add_argument("--history", required=True)
     demand.add_argument("--out", required=True)
+    forecast = sub.add_parser(
+        "demand-forecast",
+        help="offline next-day replenishment decision from censored Poisson evidence",
+    )
+    forecast.add_argument("--run-dir", required=True)
+    forecast.add_argument("--catalog-manifest", required=True)
+    forecast.add_argument("--history", required=True)
+    forecast.add_argument("--out", required=True)
     return parser
 def _cmd_demo(args: argparse.Namespace) -> int:
     result = run_demo(
@@ -172,12 +181,37 @@ def main(argv: Sequence[str] | None = None) -> int:
             output.write_bytes(json.dumps(result, ensure_ascii=False, sort_keys=True, indent=2).encode("utf-8") + b"\n")
             print(f"sku={result['sku']} observations={len(result['days'])} evidence={result['evidence_fingerprint']}")
             return 0
+        if args.command == "demand-forecast":
+            result = decide_replenishment(args.run_dir, args.catalog_manifest, args.history)
+            output = Path(args.out)
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_bytes(json.dumps(result, ensure_ascii=False, sort_keys=True, indent=2).encode("utf-8") + b"\n")
+            for contract in result["contracts"]:
+                print(
+                    f"sku={result['sku']} contract={contract['contract_id']} "
+                    f"q={contract['recommended_units']} objective={contract['objective_value']}"
+                )
+            print(
+                f"lambda_hat={result['estimate']['lambda_hat']:.12g} "
+                f"exact={result['observation_counts']['exact_days']} "
+                f"censored={result['observation_counts']['right_censored_days']} "
+                f"forecast={result['forecast_fingerprint']}"
+            )
+            return 0
         parser.error("unknown command")
     except PlanError as exc:
         for line in plan_error_lines(exc):
             print(line, file=sys.stderr)
         return 2
-    except (PipelineError, AuditError, CatalogInputError, DemandInputError, FileNotFoundError, KeyError) as exc:
+    except (
+        PipelineError,
+        AuditError,
+        CatalogInputError,
+        DemandInputError,
+        ForecastInputError,
+        FileNotFoundError,
+        KeyError,
+    ) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
     return 0

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from datetime import date
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
@@ -50,8 +50,14 @@ def inspect_demand_evidence(run_dir: str | Path, catalog_manifest: str | Path, h
         raise DemandInputError("missing decision contracts")
     for decision in decisions:
         for key in ("target", "holding_cost", "lost_margin_rate"):
-            if key in decision and (not Decimal(str(decision[key])).is_finite() or Decimal(str(decision[key])) <= 0):
-                raise DemandInputError("invalid decision parameter")
+            if key not in decision:
+                continue
+            try:
+                value = Decimal(str(decision[key]))
+            except (InvalidOperation, TypeError) as exc:
+                raise DemandInputError(f"invalid decision parameter {key}") from exc
+            if not value.is_finite() or value <= 0:
+                raise DemandInputError(f"invalid decision parameter {key}")
     result = {
         "catalog_fingerprint": catalog["catalog_fingerprint"],
         "sku": sku,

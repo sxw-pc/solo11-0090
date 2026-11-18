@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "sku": "SYN-ALPHA",
+  "observation_contract": "iid_poisson_min_sales",
+  "days": [
+    {"day": "2025-06-01", "offered_units": 3, "sold_units": 3, "stockout": true},
+    {"day": "2025-06-02", "offered_units": 4, "sold_units": 2, "stockout": false},
+    {"day": "2025-06-02", "offered_units": 2, "sold_units": 2, "stockout": true}
+  ],
+  "decisions": [
+    {"contract_id": "service_95", "kind": "service_level", "target": "0.95"},
+    {"contract_id": "cost_2_margin", "kind": "expected_cost", "holding_cost": "2", "lost_margin_rate": "0.1"}
+  ]
+}

@@ -6,6 +6,42 @@ synthetic offer manifest. Run `python -m pagedrift catalog-intake --run-dir
 <output>/catalog.json` after a demo run. It verifies page evidence and emits a
 stable catalog identity, without making any checkout or stock decision.
 
+The bounded-demand chain stays offline and decision-free until its last step.
+`demand-evidence` re-verifies the safe run and catalog, then binds a synthetic
+six-day sales log (exact days and stockout-censored days) to the catalog SKU and
+emits a stable evidence fingerprint while keeping `estimate` and
+`recommended_units` null:
+
+```bash
+python -m pagedrift demand-evidence --run-dir <demo>/snapshot \
+  --catalog-manifest pagedrift/fixtures/catalog/offers-valid.json \
+  --history pagedrift/fixtures/catalog/demand-valid.json --out <output>/evidence.json
+```
+
+`demand-forecast` consumes that same evidence and, under the explicitly declared
+synthetic contract (latent daily demands are iid `Poisson(lambda)`; exact days
+observe `D = sold`, stockout days only `D >= sold`), fits lambda by joint
+maximum likelihood over exact and right-censored observations, reports the
+likelihood/tail terms and solver convergence evidence, and renders the two
+pre-agreed contracts:
+
+```bash
+python -m pagedrift demand-forecast --run-dir <demo>/snapshot \
+  --catalog-manifest pagedrift/fixtures/catalog/offers-valid.json \
+  --history pagedrift/fixtures/catalog/demand-valid.json --out <output>/forecast.json
+```
+
+`service_95` returns the smallest integer q with `P(D <= q) >= 0.95`;
+`cost_2_margin` minimizes
+`2 E[max(q-D,0)] + (0.1 * catalog_price) E[max(D-q,0)]`, breaking ties toward
+the smaller q. The catalog price enters the lost-sales term and therefore the
+decision: the `offers-price-low.json` fixture changes only the price and flips
+the cost-contract quantity. The output always restates that the Poisson result
+is conditional on the synthetic contract and is not an assumption-free estimate
+of real demand; unsafe runs, unknown SKUs, conflicting receipts and
+unidentified inputs are rejected with an explanatory error and no estimate is
+written.
+
 Deep-pagination drift verification bench.
 
 > **Compliance first.** pagedrift is for analysing synthetic data sources, or
@@ -111,6 +147,14 @@ python -m pagedrift ledger show --run <run_id> --ledger dist/demo/ledger.sqlite
 # Collect and audit just one declared strategy.
 python -m pagedrift collect --plan pagedrift/plans/default.yaml \
   --strategy keyset --out dist/keyset-only
+
+# Verify bounded sales evidence, then render the two replenishment contracts.
+python -m pagedrift demand-evidence --run-dir dist/demo/snapshot \
+  --catalog-manifest pagedrift/fixtures/catalog/offers-valid.json \
+  --history pagedrift/fixtures/catalog/demand-valid.json --out dist/evidence.json
+python -m pagedrift demand-forecast --run-dir dist/demo/snapshot \
+  --catalog-manifest pagedrift/fixtures/catalog/offers-valid.json \
+  --history pagedrift/fixtures/catalog/demand-valid.json --out dist/forecast.json
 ```
 
 ## Repository layout

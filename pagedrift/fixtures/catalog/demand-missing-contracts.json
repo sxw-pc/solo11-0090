@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "sku": "SYN-ALPHA",
+  "observation_contract": "iid_poisson_min_sales",
+  "days": [
+    {"day": "2025-06-01", "offered_units": 3, "sold_units": 3, "stockout": true},
+    {"day": "2025-06-02", "offered_units": 4, "sold_units": 2, "stockout": false},
+    {"day": "2025-06-03", "offered_units": 3, "sold_units": 3, "stockout": true},
+    {"day": "2025-06-04", "offered_units": 5, "sold_units": 4, "stockout": false},
+    {"day": "2025-06-05", "offered_units": 2, "sold_units": 2, "stockout": true},
+    {"day": "2025-06-06", "offered_units": 4, "sold_units": 3, "stockout": false}
+  ],
+  "decisions": []
+}
