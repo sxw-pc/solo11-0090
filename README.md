@@ -111,6 +111,14 @@ python -m pagedrift ledger show --run <run_id> --ledger dist/demo/ledger.sqlite
 # Collect and audit just one declared strategy.
 python -m pagedrift collect --plan pagedrift/plans/default.yaml \
   --strategy keyset --out dist/keyset-only
+
+# Replay the fixed srswor_by_category design against a safe run, verify the
+# human inspection receipts, and emit bounded release decisions: exact totals
+# for fully inspected categories, one-sided 95% hypergeometric upper bounds
+# for partially sampled ones, plus per-contract publishable/blocked verdicts.
+python -m pagedrift sample-quality --run-dir dist/demo/snapshot \
+  --manifest pagedrift/fixtures/catalog/sample-quality-valid.json \
+  --out dist/demo/sample-quality.json
 ```
 
 ## Repository layout

@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "sampling_design": "srswor_by_category",
+  "seed": 42,
+  "sample_sizes": {
+    "delta": 3,
+    "alpha": 8,
+    "beta": 7,
+    "gamma": 7
+  },
+  "observations": [
+    {
+      "item_id": "itm-0001",
+      "defect": false
+    },
+    {
+      "item_id": "itm-0002",
+      "defect": true
+    },
+    {
+      "item_id": "itm-0003",
+      "defect": false
+    },
+    {
+      "item_id": "itm-0004",
+      "defect": false
+    },
+    {
+      "item_id": "itm-0005",
+      "defect": false
+    },
+    {
+      "item_id": "itm-0006",
+      "defect": true
+    },
+    {
+      "item_id": "itm-0007",
+      "defect": false
+    },
+    {
+      "item_id": "itm-0008",
+      "defect": false
+    },
+    {
+      "item_id": "itm-0010",
+      "defect": true
+    },
+    {
+      "item_id": "itm-0011",
+      "defect": false
+    },
+    {
+      "item_id": "itm-0012",
+      "defect": false
+    },
+    {
+      "item_id": "itm-0014",
+      "defect": false
+    },
+    {
+      "item_id": "itm-0015",
+      "defect": false
+    },
+    {
+      "item_id": "itm-0016",
+      "defect": false
+    },
+    {
+      "item_id": "itm-0018",
+      "defect": false
+    },
+    {
+      "item_id": "itm-0019",
+      "defect": false
+    },
+    {
+      "item_id": "itm-0020",
+      "defect": false
+    },
+    {
+      "item_id": "itm-0021",
+      "defect": false
+    },
+    {
+      "item_id": "itm-0022",
+      "defect": false
+    },
+    {
+      "item_id": "itm-0023",
+      "defect": false
+    },
+    {
+      "item_id": "itm-0024",
+      "defect": false
+    },
+    {
+      "item_id": "itm-0026",
+      "defect": false
+    },
+    {
+      "item_id": "itm-0027",
+      "defect": false
+    },
+    {
+      "item_id": "itm-0028",
+      "defect": false
+    },
+    {
+      "item_id": "itm-0030",
+      "defect": false
+    }
+  ],
+  "release_contracts": [
+    {
+      "contract_id": "overall_18",
+      "kind": "overall_max",
+      "max_rate": "0.18"
+    },
+    {
+      "contract_id": "each_30",
+      "kind": "each_category_max",
+      "max_rate": "0.30"
+    }
+  ]
+}

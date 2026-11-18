@@ -169,7 +169,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             output = Path(args.out)
             output.parent.mkdir(parents=True, exist_ok=True)
             output.write_bytes(json.dumps(result, ensure_ascii=False, sort_keys=True, indent=2).encode("utf-8") + b"\n")
-            print(f"sample={sum(s['sample'] for s in result['strata'])} population={sum(s['population'] for s in result['strata'])}")
+            overall = result["population_upper_bounds"]["overall"]
+            print(f"sample={sum(s['sample'] for s in result['strata'])} population={overall['population']}")
+            print(
+                f"overall_upper_bound={overall['upper_defects']}/{overall['population']} "
+                f"rate={overall['upper_rate']} ({overall['upper_rate_decimal']}) "
+                f"confidence={result['population_upper_bounds']['confidence_level']}"
+            )
+            for decision in result["release_decisions"]:
+                print(f"contract={decision['contract_id']} decision={decision['decision']} reason={decision['reason']}")
             return 0
         parser.error("unknown command")
     except PlanError as exc:
