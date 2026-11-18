@@ -133,3 +133,49 @@ HTTP and in-process transports consume the same `MockCore` bytes; elapsed time i
 recorded as 0 under `--frozen-time`. Reports contain no absolute paths, so the
 same plan/schedule produces the same numbers, findings and JSON bytes in either
 transport.
+
+## 5. Fictional election seat settlement
+
+The `election` feature is a fully synthetic contract algorithm for the invented
+`fictional-seven-rivers` jurisdiction. Every vote, party name, district and
+majority conclusion is locally generated; it deliberately does not model any
+real election system or political fact.
+
+### 5.1 Evidence lock
+
+`inspect_election_run` only accepts a run whose audit verdict is `safe` and
+whose page evidence still verifies. The run's unique item ids must exactly
+cover the fixture's precinct identities: duplicated or missing precincts,
+unknown parties and invalid certified direct winners all block inspection. The
+returned evidence binds the run id, audit fingerprint and fixture SHA-256.
+`preview_national_list_seats` is a plain national D'Hondt preview using exact
+`Fraction` values; it never merges direct seats, so it can contradict the
+certified direct lower bounds without settling anything.
+
+### 5.2 Two pre-fixed contracts
+
+Both contracts consume the same verified evidence and emit hash-stamped
+receipts (`pagedrift/seat_settlement.py`).
+
+1. **fixed_house** — the chamber keeps exactly `base_house_seats` seats. All
+   certified direct winners are retained first; a national preview that would
+   give a party fewer seats can never revoke a direct seat. Remaining seats are
+   filled one at a time by the highest next D'Hondt quotient computed against
+   each party's *current total* seat count, with exact quotient ties resolved
+   by ascending party id. Every round records all parties' quotients, the
+   selected party and the reason.
+2. **overhang_expansion** — direct seats are kept but the chamber may grow.
+   The contract evaluates every house size from `base_house_seats` upward,
+   recording the full national allocation and precise shortfalls at each
+   infeasible N, and stops at the first N whose national D'Hondt allocation
+   dominates every party's direct count. List top-up seats are the minimum-N
+   national allocation minus the direct lower bound, so direct and national
+   seats are never added together. A zero-vote party holding a direct seat is
+   structurally never feasible and raises `NeverFeasibleSettlementError`.
+
+Because the two contracts are both legitimate pre-fixed rules over identical
+inputs, they can reach opposite single-party-majority conclusions: the fixed
+chamber may leave one party above half while the expanded chamber dilutes the
+same party below half. Receipt replay recomputes both contracts and refuses any
+receipt whose fingerprint or run/audit/fixture binding no longer matches.
+

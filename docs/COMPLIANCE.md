@@ -51,5 +51,11 @@ scheduling, resumable orchestration, link health checks, archival crawling,
 subscription polling, form-filling RPA, fuzzy entity resolution or metrics
 calculation.
 
+The fictional election seat-settlement feature is a contract-algorithm demo
+over invented `fictional-seven-rivers` data only. It is not an implementation
+of any real jurisdiction's electoral system, and its vote totals, district
+names, parties and majority conclusions must not be presented as real
+political facts or used to predict or interpret an actual election.
+
 This document is a scope statement, not legal advice. Obtain authorization and
 legal guidance appropriate to your jurisdiction and the data source.

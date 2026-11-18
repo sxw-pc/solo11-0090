@@ -8,8 +8,17 @@ from typing import Sequence
 from .audit.compare import build_comparison, write_comparison
 from .audit.engine import AuditError, audit_run, write_audit_reports
 from .config import PlanError, load_plan, plan_error_lines
+from .election_evidence import ElectionEvidenceError, inspect_election_run
 from .evidence import verify_run
 from .pipeline import DEFAULT_FROZEN_TIME, PipelineError, collect_single, run_demo
+from .seat_settlement import (
+    SeatSettlementError,
+    settle_election,
+    settle_fixed_house,
+    settle_overhang_expansion,
+    verify_settlement_receipt,
+    write_receipt_bundle,
+)
 from .store.sqlite_ledger import Ledger
 
 def _add_transport_options(parser: argparse.ArgumentParser) -> None:
@@ -46,6 +55,29 @@ def _build_parser() -> argparse.ArgumentParser:
     show = ledger_sub.add_parser("show", help="show one run from the ledger")
     show.add_argument("--run", required=True)
     show.add_argument("--ledger", default="dist/demo/ledger.sqlite")
+    election = sub.add_parser(
+        "election",
+        help="fictional election evidence and pre-fixed seat settlement contracts",
+    )
+    election_sub = election.add_subparsers(dest="election_command", required=True)
+    inspect = election_sub.add_parser(
+        "inspect", help="lock a fictional election fixture to a verified safe run"
+    )
+    inspect.add_argument("run_dir", help="verified safe pagination run directory")
+    inspect.add_argument("fixture", help="fictional election contract JSON fixture")
+    settle = election_sub.add_parser(
+        "settle",
+        help="settle both pre-fixed chamber contracts and write the receipt bundle",
+    )
+    settle.add_argument("run_dir", help="verified safe pagination run directory")
+    settle.add_argument("fixture", help="fictional election contract JSON fixture")
+    settle.add_argument("--out", required=True, help="receipt bundle output path")
+    verify = election_sub.add_parser(
+        "verify-receipt", help="replay a settlement receipt against the same evidence"
+    )
+    verify.add_argument("run_dir", help="verified safe pagination run directory")
+    verify.add_argument("fixture", help="fictional election contract JSON fixture")
+    verify.add_argument("--receipt", required=True, help="settlement receipt bundle path")
     return parser
 def _cmd_demo(args: argparse.Namespace) -> int:
     result = run_demo(
@@ -131,6 +163,38 @@ def _cmd_ledger_show(args: argparse.Namespace) -> int:
     print(json.dumps(payload, ensure_ascii=False, indent=2))
     return 0
 
+
+def _cmd_election_inspect(args: argparse.Namespace) -> int:
+    evidence = inspect_election_run(args.run_dir, args.fixture)
+    print(json.dumps(evidence, ensure_ascii=False, indent=2))
+    return 0
+
+
+def _cmd_election_settle(args: argparse.Namespace) -> int:
+    evidence = inspect_election_run(args.run_dir, args.fixture)
+    bundle = settle_election(evidence)
+    write_receipt_bundle(args.out, bundle)
+    for name in ("fixed_house", "overhang_expansion"):
+        receipt = bundle[name]
+        majority = receipt["majority"]
+        print(
+            f"{name}: house_size={receipt['majority']['house_size']} "
+            f"seats={receipt['final_seats']} "
+            f"single_party_majority={majority['single_party_majority']} "
+            f"receipt_sha256={receipt['receipt_sha256'][:12]}"
+        )
+    print(f"wrote {args.out}")
+    return 0
+
+
+def _cmd_election_verify_receipt(args: argparse.Namespace) -> int:
+    evidence = inspect_election_run(args.run_dir, args.fixture)
+    bundle = json.loads(Path(args.receipt).read_text(encoding="utf-8"))
+    for name in ("fixed_house", "overhang_expansion"):
+        result = verify_settlement_receipt(bundle[name], evidence)
+        print(f"{name}: {result['status']} receipt_sha256={result['receipt_sha256']}")
+    return 0
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
@@ -147,12 +211,26 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _cmd_evidence_verify(args)
         if args.command == "ledger" and args.ledger_command == "show":
             return _cmd_ledger_show(args)
+        if args.command == "election":
+            if args.election_command == "inspect":
+                return _cmd_election_inspect(args)
+            if args.election_command == "settle":
+                return _cmd_election_settle(args)
+            if args.election_command == "verify-receipt":
+                return _cmd_election_verify_receipt(args)
         parser.error("unknown command")
     except PlanError as exc:
         for line in plan_error_lines(exc):
             print(line, file=sys.stderr)
         return 2
-    except (PipelineError, AuditError, FileNotFoundError, KeyError) as exc:
+    except (
+        PipelineError,
+        AuditError,
+        ElectionEvidenceError,
+        SeatSettlementError,
+        FileNotFoundError,
+        KeyError,
+    ) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
     return 0

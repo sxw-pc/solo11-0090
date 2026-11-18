@@ -21,7 +21,12 @@ pagedrift = "pagedrift.cli:main"
 include = ["pagedrift*"]
 
 [tool.setuptools.package-data]
-pagedrift = ["plans/*.yaml", "fixtures/*.jsonl", "fixtures/golden/*"]
+pagedrift = [
+    "plans/*.yaml",
+    "fixtures/*.jsonl",
+    "fixtures/golden/*",
+    "fixtures/fictional_election/*.json",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,0 +1,292 @@
+{
+  "schema_version": 1,
+  "jurisdiction": "fictional-seven-rivers",
+  "parties": [
+    "A",
+    "B"
+  ],
+  "base_house_seats": 10,
+  "constituency_seats": 8,
+  "party_list_rule": "d_hondt_exact_fraction",
+  "tie_break": "party_id_ascending",
+  "contracts": [
+    "fixed_house",
+    "overhang_expansion"
+  ],
+  "precincts": [
+    {
+      "item_id": "itm-0001",
+      "district": "D1",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0002",
+      "district": "D2",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0003",
+      "district": "D3",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0004",
+      "district": "D4",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0005",
+      "district": "D5",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0006",
+      "district": "D6",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0007",
+      "district": "D7",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0008",
+      "district": "D8",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0009",
+      "district": "D1",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0010",
+      "district": "D2",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0011",
+      "district": "D3",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0012",
+      "district": "D4",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0013",
+      "district": "D5",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0014",
+      "district": "D6",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0015",
+      "district": "D7",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0016",
+      "district": "D8",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0017",
+      "district": "D1",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0018",
+      "district": "D2",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0019",
+      "district": "D3",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0020",
+      "district": "D4",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0021",
+      "district": "D5",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0022",
+      "district": "D6",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0023",
+      "district": "D7",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0024",
+      "district": "D8",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0025",
+      "district": "D1",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0026",
+      "district": "D2",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0027",
+      "district": "D3",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0028",
+      "district": "D4",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0029",
+      "district": "D5",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    },
+    {
+      "item_id": "itm-0030",
+      "district": "D6",
+      "list_votes": {
+        "A": 10,
+        "B": 10
+      }
+    }
+  ],
+  "certified_direct_winners": [
+    {
+      "district": "D1",
+      "winner": "A"
+    },
+    {
+      "district": "D2",
+      "winner": "A"
+    },
+    {
+      "district": "D3",
+      "winner": "A"
+    },
+    {
+      "district": "D4",
+      "winner": "A"
+    },
+    {
+      "district": "D5",
+      "winner": "B"
+    },
+    {
+      "district": "D6",
+      "winner": "B"
+    },
+    {
+      "district": "D7",
+      "winner": "B"
+    },
+    {
+      "district": "D8",
+      "winner": "B"
+    }
+  ]
+}
