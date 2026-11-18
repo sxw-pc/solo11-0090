@@ -6,6 +6,17 @@ synthetic offer manifest. Run `python -m pagedrift catalog-intake --run-dir
 <output>/catalog.json` after a demo run. It verifies page evidence and emits a
 stable catalog identity, without making any checkout or stock decision.
 
+The origin-quote example binds that verified catalog to a fictional
+regional-content contract. Run `python -m pagedrift origin-quote --run-dir
+<demo>/snapshot --manifest pagedrift/fixtures/origin_content/offers.json
+--contract pagedrift/fixtures/origin_content/origin-contract.json --out
+<output>/origin-quote.json`. It solves the rational bill-of-materials
+fixed-point system exactly (cyclic components included), proves the feasible
+regional-share interval with dual certificates, and emits internal scenario
+duty quotes under the guaranteed/plausible contracts. All goods and rates are
+synthetic: the quotes are local scenarios only, not customs documents, and
+state no legal conclusion.
+
 Deep-pagination drift verification bench.
 
 > **Compliance first.** pagedrift is for analysing synthetic data sources, or

@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "finished_item_id": "itm-0001",
+  "regional_threshold": "9/20",
+  "standard_duty_rate": "1/10",
+  "preference_duty_rate": "3/100",
+  "contracts": [
+    "guaranteed_origin_quote",
+    "plausible_origin_quote"
+  ],
+  "terminal_shares": {
+    "itm-0002": "1",
+    "itm-0003": "0"
+  },
+  "bill_of_materials": {
+    "itm-0001": [
+      {
+        "input": "itm-0002",
+        "fraction": "1/5"
+      },
+      {
+        "input": "itm-0003",
+        "fraction": "1/5"
+      },
+      {
+        "input": "itm-0004",
+        "fraction": "3/10"
+      },
+      {
+        "input": "itm-0006",
+        "fraction": "3/10"
+      }
+    ],
+    "itm-0004": [
+      {
+        "input": "itm-9999",
+        "fraction": "1"
+      }
+    ],
+    "itm-0005": [
+      {
+        "input": "itm-0004",
+        "fraction": "1"
+      }
+    ],
+    "itm-0006": [
+      {
+        "input": "itm-0007",
+        "fraction": "1"
+      }
+    ],
+    "itm-0007": [
+      {
+        "input": "itm-0006",
+        "fraction": "1"
+      }
+    ]
+  },
+  "independent_evidence_constraints": [
+    {
+      "left": "itm-0004",
+      "op": ">=",
+      "right": "1/4"
+    },
+    {
+      "left": "itm-0006",
+      "op": ">=",
+      "right": "1/4"
+    },
+    {
+      "terms": [
+        {
+          "item_id": "itm-0004",
+          "coefficient": "1"
+        },
+        {
+          "item_id": "itm-0006",
+          "coefficient": "1"
+        }
+      ],
+      "op": "<=",
+      "right": "1"
+    }
+  ]
+}

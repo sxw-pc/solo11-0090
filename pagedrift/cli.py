@@ -12,6 +12,7 @@ from .evidence import verify_run
 from .pipeline import DEFAULT_FROZEN_TIME, PipelineError, collect_single, run_demo
 from .store.sqlite_ledger import Ledger
 from .catalog_intake import CatalogInputError, intake_catalog
+from .origin_quote import OriginQuoteError, quote_origin
 from .sample_quality import SampleQualityError, inspect_sample
 
 def _add_transport_options(parser: argparse.ArgumentParser) -> None:
@@ -56,6 +57,11 @@ def _build_parser() -> argparse.ArgumentParser:
     sample.add_argument("--run-dir", required=True)
     sample.add_argument("--manifest", required=True)
     sample.add_argument("--out", required=True)
+    origin = sub.add_parser("origin-quote", help="quote internal synthetic duty scenarios from a verified catalog and origin contract")
+    origin.add_argument("--run-dir", required=True)
+    origin.add_argument("--manifest", required=True)
+    origin.add_argument("--contract", required=True)
+    origin.add_argument("--out", required=True)
     return parser
 def _cmd_demo(args: argparse.Namespace) -> int:
     result = run_demo(
@@ -171,12 +177,24 @@ def main(argv: Sequence[str] | None = None) -> int:
             output.write_bytes(json.dumps(result, ensure_ascii=False, sort_keys=True, indent=2).encode("utf-8") + b"\n")
             print(f"sample={sum(s['sample'] for s in result['strata'])} population={sum(s['population'] for s in result['strata'])}")
             return 0
+        if args.command == "origin-quote":
+            catalog = intake_catalog(args.run_dir, args.manifest)
+            result = quote_origin(catalog, args.contract)
+            output = Path(args.out)
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_bytes(json.dumps(result, ensure_ascii=False, sort_keys=True, indent=2).encode("utf-8") + b"\n")
+            bounds = result["origin_share_bounds"]
+            span = f"{bounds['min']}..{bounds['max']}" if bounds else "none"
+            print(f"origin_quote feasibility={result['feasibility']} bounds={span}")
+            for name, quote in (result["duty_quotes"] or {}).items():
+                print(f"  {name}: rate={quote['applied_rate']} duty_cny={quote['duty_cny']}")
+            return 0
         parser.error("unknown command")
     except PlanError as exc:
         for line in plan_error_lines(exc):
             print(line, file=sys.stderr)
         return 2
-    except (PipelineError, AuditError, CatalogInputError, SampleQualityError, FileNotFoundError, KeyError) as exc:
+    except (PipelineError, AuditError, CatalogInputError, SampleQualityError, OriginQuoteError, FileNotFoundError, KeyError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
     return 0
