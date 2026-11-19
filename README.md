@@ -90,6 +90,52 @@ moves later records past the next window and can skip one; an insertion before
 the cursor shifts the boundary and can repeat one. The auditor does not guess a
 cause from the mutation type: it classifies what the evidence proves.
 
+## Consumer delivery and cycle binding
+
+`deliver` records an immutable per-run receipt for one consumer contract; the
+caller picks the run explicitly:
+
+```bash
+python -m pagedrift deliver --run-dir dist/demo/snapshot \
+  --ledger dist/demo/ledger.sqlite \
+  --contract pagedrift/plans/consumer_sample.yaml --out dist/receipt.json
+```
+
+`deliver-bind` goes one level up: it attributes a **consumption cycle** to one
+specific audited run, with two independently authorised routes:
+
+- `--scope strict` only accepts an explicit local binding manifest
+  (`cycle_id` + `consumer_id` + `run_id`, with optional `inputs`/`audit_sha256`
+  pins). Without a manifest the cycle stays `pending`; if the manifest-bound
+  run fails the input-fingerprint, audit-SHA, page-evidence or contract checks
+  the cycle is `blocked` with a stable reason — another safe run is never
+  substituted.
+- `--scope assisted` delivers only when exactly one candidate in the ledger
+  has trustworthy page evidence, a `safe` audit and contract-satisfying
+  content under the shared input identity. The binding is then marked
+  `authorization=inferred`; an inference is never written as an explicit
+  declaration of the collection source. Zero eligible candidates keeps the
+  cycle `pending`; two or more eligible candidates (e.g. keyset and snapshot
+  both safe but with different records) is a `conflict` that preserves each
+  candidate's provenance and record differences — never a pick by strategy
+  name, recency or count.
+
+```bash
+python -m pagedrift deliver-bind --ledger dist/demo/ledger.sqlite \
+  --contract pagedrift/plans/consumer_sample.yaml \
+  --cycle cycle-2024-001 --scope assisted --out dist/binding.json
+```
+
+Every decision (ready/pending/conflict/blocked, candidate evidence, contract
+and audit/receipt digests, authorization level) is persisted atomically in the
+ledger's `cycle_bindings` table and mirrored in the `--out` JSON. A delivered
+cycle is immutable: re-running yields the identical decision, and runs that
+appear later never silently change it. The synthetic
+`pagedrift/plans/binding_double_safe.yaml` fixture (4 records, 2 per page, one
+beta record inserted before the second request) reproduces the double-safe
+conflict: keyset and snapshot both audit safe, but only the keyset delivery
+contains the inserted record.
+
 ## Other commands
 
 ```bash

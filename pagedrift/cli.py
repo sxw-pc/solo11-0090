@@ -8,8 +8,9 @@ from typing import Sequence
 from .audit.compare import build_comparison, write_comparison
 from .audit.engine import AuditError, audit_run, write_audit_reports
 from .config import PlanError, load_plan, plan_error_lines
-from .delivery import DeliveryError, deliver, load_contract
+from .delivery import DeliveryError, bind_cycle, deliver, load_contract, load_manifest
 from .evidence import verify_run
+from .ids import sha256_file
 from .pipeline import DEFAULT_FROZEN_TIME, PipelineError, collect_single, run_demo
 from .store.sqlite_ledger import Ledger
 
@@ -52,6 +53,13 @@ def _build_parser() -> argparse.ArgumentParser:
     handoff.add_argument("--ledger", required=True)
     handoff.add_argument("--contract", required=True)
     handoff.add_argument("--out", required=True)
+    bind = sub.add_parser("deliver-bind", help="bind a consumption cycle to one audited run")
+    bind.add_argument("--ledger", required=True)
+    bind.add_argument("--contract", required=True)
+    bind.add_argument("--cycle", required=True, help="consumption cycle identifier")
+    bind.add_argument("--scope", required=True, choices=("strict", "assisted"))
+    bind.add_argument("--manifest", default=None, help="explicit binding manifest (strict scope only)")
+    bind.add_argument("--out", required=True)
     return parser
 def _cmd_demo(args: argparse.Namespace) -> int:
     result = run_demo(
@@ -145,6 +153,32 @@ def _cmd_deliver(args: argparse.Namespace) -> int:
     print(f"consumer={contract.consumer_id} run_id={receipt['run_id']} status={receipt['status']}")
     return 0 if receipt["status"] == "ready" else 1
 
+def _cmd_deliver_bind(args: argparse.Namespace) -> int:
+    contract = load_contract(args.contract)
+    manifest = None
+    manifest_sha256 = None
+    if args.manifest:
+        manifest = load_manifest(args.manifest)
+        manifest_sha256 = sha256_file(Path(args.manifest))
+    with Ledger(args.ledger) as ledger:
+        decision = bind_cycle(
+            ledger=ledger,
+            contract=contract,
+            cycle_id=args.cycle,
+            scope=args.scope,
+            manifest=manifest,
+            manifest_sha256=manifest_sha256,
+        )
+    Path(args.out).write_text(
+        json.dumps(decision, ensure_ascii=False, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+    )
+    print(
+        f"consumer={decision['consumer_id']} cycle={decision['cycle_id']} scope={decision['scope']} "
+        f"status={decision['status']} authorization={decision['authorization'] or '-'} "
+        f"run_id={decision['run_id'] or '-'} reason={decision['reason'] or '-'}"
+    )
+    return 0 if decision["status"] == "ready" else 1
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
@@ -163,6 +197,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _cmd_ledger_show(args)
         if args.command == "deliver":
             return _cmd_deliver(args)
+        if args.command == "deliver-bind":
+            return _cmd_deliver_bind(args)
         parser.error("unknown command")
     except PlanError as exc:
         for line in plan_error_lines(exc):

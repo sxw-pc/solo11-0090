@@ -1,0 +1,12 @@
+# Insert one beta record (sort_key 14, between the first page's keys and the
+# rest) immediately before the second item request. Live-cursor strategies
+# observe it; the pinned snapshot view does not.
+version: 1
+before_request:
+  - at: 2
+    mutations:
+      - type: insert
+        id: itm-0901
+        sort_key: 14
+        title: Inserted beta record
+        category: beta
